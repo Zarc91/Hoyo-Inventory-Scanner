@@ -1,2 +1,3 @@
-# ZZZ-Inventory-Scanner
-Inventory scanner for the game Zenless Zone Zero
+# Hoyo-Inventory-Scanner
+Inventory scanner for all the Hoyoverse games.
+Supports Geforce Now.
