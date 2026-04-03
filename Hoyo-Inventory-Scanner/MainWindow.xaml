@@ -1,12 +1,89 @@
-﻿<Window x:Class="ZZZ_Inventory_Scanner.MainWindow"
+﻿<Window x:Class="Hoyo_Inventory_Scanner.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ZZZ_Inventory_Scanner"
+        xmlns:local="clr-namespace:Hoyo_Inventory_Scanner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ComboBox HorizontalAlignment="Left" Margin="304,191,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ComboBox_SelectionChanged"/>
+        Title="Hoyo Inventory Scanner" Background="#FFFFFF" FontSize="18" Height="600" MinWidth="470" MinHeight="450" Width="1150">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <!--Game-->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <CheckBox x:Name="GN" Grid.Column="0" Content="Geforce Now" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="GN_isChecked"/>
+
+            <!--https://www.youtube.com/watch?v=4bZWEDBZl74-->
+            <ComboBox x:Name="Game" Grid.Column="1" SelectionChanged="Game_SelectionChanged" Width="160" SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ComboBoxItem Content="Genshin Impact"/>
+                <ComboBoxItem Content="HSR"/>
+                <ComboBoxItem Content="ZZZ"/>
+            </ComboBox>
+            <Label Content="Choose the game"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,17,57" Grid.Column="1" Height="38"/>
+        </Grid>
+
+        <!--Settings-->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <CheckBox x:Name="Four_stars" Grid.Column="0" Content="Scan 4*" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="Four_stars_isChecked"/>
+            
+            <TextBox x:Name="Speed" Grid.Column="1" PreviewTextInput="Speed_PreviewTextInput" TextChanged="Speed_TextChanged" MaxLength="4" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="500" VerticalAlignment="Center" Width="50"/>
+            <Label Content="Scan speed (ms)"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,45" Grid.Column="1" Height="38"/>
+
+        </Grid>
+
+        <!--Scan result + debug window-->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Name="DebugBox"
+                 Grid.Column="0"
+                 IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 VerticalContentAlignment="Stretch"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True" Margin="0,10,10,10" Background="#EEEEEEEE"/>
+
+            <TextBox Name="ResultBox"
+                 Grid.Column="1"
+                 IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 VerticalContentAlignment="Stretch"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True" Margin="10,10,0,10" Background="#EEEEEEEE"/>
+
+        </Grid>
+
+        <!--Scan-->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="Export" Content="Export" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
+            <Button x:Name="Scan" Content="SCAN NOW" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="10"/>
+            <Button x:Name="Copy" Content="Copy" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
+        </Grid>
     </Grid>
 </Window>
