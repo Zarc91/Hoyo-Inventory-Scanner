@@ -21,10 +21,10 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <CheckBox x:Name="GN" Grid.Column="0" Content="Geforce Now" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="GN_isChecked"/>
+            <CheckBox x:Name="GN" Grid.Column="0" Content="Geforce Now" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!--https://www.youtube.com/watch?v=4bZWEDBZl74-->
-            <ComboBox x:Name="Game" Grid.Column="1" SelectionChanged="Game_SelectionChanged" Width="160" SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <ComboBox x:Name="Game" Grid.Column="1" Width="160" SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ComboBoxItem Content="Genshin Impact"/>
                 <ComboBoxItem Content="HSR"/>
                 <ComboBoxItem Content="ZZZ"/>
@@ -39,9 +39,9 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <CheckBox x:Name="Four_stars" Grid.Column="0" Content="Scan 4*" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Checked="Four_stars_isChecked"/>
+            <CheckBox x:Name="Four_stars" Grid.Column="0" Content="Scan 4*" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             
-            <TextBox x:Name="Speed" Grid.Column="1" PreviewTextInput="Speed_PreviewTextInput" TextChanged="Speed_TextChanged" MaxLength="4" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="500" VerticalAlignment="Center" Width="50"/>
+            <TextBox x:Name="Speed" Grid.Column="1" PreviewTextInput="Speed_PreviewTextInput" TextChanged="Speed_TextChanged" MaxLength="4" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="200" VerticalAlignment="Center" Width="50"/>
             <Label Content="Scan speed (ms)"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,45" Grid.Column="1" Height="38"/>
 
         </Grid>
@@ -60,7 +60,7 @@
                  HorizontalScrollBarVisibility="Disabled"
                  VerticalContentAlignment="Stretch"
                  TextWrapping="Wrap"
-                 AcceptsReturn="True" Margin="0,10,10,10" Background="#EEEEEEEE"/>
+                 AcceptsReturn="True" Margin="0,10,10,10" Background="#EEEEEEEE" FontFamily="Consolas" FontSize="12"/>
 
             <TextBox Name="ResultBox"
                  Grid.Column="1"
@@ -69,7 +69,7 @@
                  HorizontalScrollBarVisibility="Disabled"
                  VerticalContentAlignment="Stretch"
                  TextWrapping="Wrap"
-                 AcceptsReturn="True" Margin="10,10,0,10" Background="#EEEEEEEE"/>
+                 AcceptsReturn="True" Margin="10,10,0,10" Background="#EEEEEEEE" FontFamily="Consolas" FontSize="12"/>
 
         </Grid>
 
@@ -81,9 +81,9 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="Export" Content="Export" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-            <Button x:Name="Scan" Content="SCAN NOW" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="10"/>
-            <Button x:Name="Copy" Content="Copy" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
+            <Button x:Name="Export" Content="Export" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" Click="Export_Click"/>
+            <Button x:Name="Scan" Content="SCAN NOW" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="10" Click="Scan_Click"/>
+            <Button x:Name="Copy" Content="Copy" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" Click="Copy_Click"/>
         </Grid>
     </Grid>
 </Window>
