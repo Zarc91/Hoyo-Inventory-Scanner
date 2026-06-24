@@ -3,12 +3,14 @@ using System.Drawing;
 using System.Windows.Input;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Drawing.Imaging;
+using AForge.Imaging.Filters;
+using System.Threading.Tasks;
 
 namespace Hoyo_Inventory_Scanner
 {
     abstract class Scanner {
         public int scan_speed;
-        public bool scan_four_stars;
         public bool is_geforce_now;
         public int most_left_position;
         public int most_top_position;
@@ -31,9 +33,11 @@ namespace Hoyo_Inventory_Scanner
         const int MOUSEEVENTF_LEFTUP = 0x04;
         const int MOUSEEVENTF_MOVE = 0x0001;
 
-        public Scanner(int scan_speed, bool scan_four_stars, bool is_geforce_now, int most_left_position, int most_top_position, int offset_row, int offset_line, int rows_per_line, int lines_before_scrolling, Size screenshot_size, int screenshot_start_x, int screenshot_start_y) {
+        [DllImport("user32.dll")]
+        static extern short GetAsyncKeyState(int vKey);
+
+        public Scanner(int scan_speed, bool is_geforce_now, int most_left_position, int most_top_position, int offset_row, int offset_line, int rows_per_line, int lines_before_scrolling, Size screenshot_size, int screenshot_start_x, int screenshot_start_y) {
             this.scan_speed = scan_speed;
-            this.scan_four_stars = scan_four_stars;
             this.is_geforce_now = is_geforce_now;
             this.most_left_position = most_left_position;
             this.most_top_position = most_top_position;
@@ -51,6 +55,7 @@ namespace Hoyo_Inventory_Scanner
             bool success;
             int current_row = 0;
             int current_line = 0;
+            int artefact_counter = 0;
             Artefact current_artefact;
             Bitmap screenshot;
 
@@ -74,15 +79,21 @@ namespace Hoyo_Inventory_Scanner
                 screenshot = takeScreenshot();
                 current_artefact = analyzeArtefact(screenshot);
 
-                if(Keyboard.IsKeyDown(Key.Escape))
+                // if tab is held down, stops the scan
+                if ((GetAsyncKeyState(0x09) & 0x8000) != 0) {
+                    Logger.LogDebug("Scanning process interrupted.");
+                    Logger.LogDebug(artefact_counter + " artefacts scanned.");
+                    WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
                     return;
+                }
 
                 Thread.Sleep((int)scan_speed);
             }
-
+            Logger.LogDebug(artefact_counter + " artefacts scanned.");
+            WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
         }
 
-        public abstract string generateJson();
+        public abstract string generateExport();
 
         public void moveCursorToNextArtefact(ref int current_row, ref int current_line) {
             // cursor not at the last row
@@ -102,22 +113,25 @@ namespace Hoyo_Inventory_Scanner
                     mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
                     mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
                 }
-                // last line and row, have to scroll up smoothly
+                // last line and row, have to scroll up smoothly (hold click and drag up)
                 else {
                     mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                    Thread.Sleep(1000);
-                    for (int i = 0; i < most_top_position + offset_line * lines_before_scrolling; i++)
-                    {
-                        mouse_event(MOUSEEVENTF_MOVE, 0, 1, 0, 0);
-                        Thread.Sleep(1);
+                    Thread.Sleep(500);
+                    for (int i = 0; i < 100; i++) {
+                        mouse_event(MOUSEEVENTF_MOVE, -1, 0, 0, 0);
+                        Thread.Sleep(3);
                     }
-                    for (int i = 0; i < 1073 - (most_top_position + offset_line * lines_before_scrolling) + offset_line * (lines_before_scrolling + 1); i++) {
+                    for (int i = 0; i < offset_line * lines_before_scrolling + 1; i++) {
                         mouse_event(MOUSEEVENTF_MOVE, 0, -1, 0, 0);
+                        Thread.Sleep(3);
+                    }
+                    for (int i = 0; i < 100; i++) {
+                        mouse_event(MOUSEEVENTF_MOVE, 1, 0, 0, 0);
                         Thread.Sleep(3);
                     }
                     Thread.Sleep(1000);
                     mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     current_line = 0;
                     current_row = 0;
                     SetCursorPos(most_left_position + current_row * offset_row, most_top_position + current_line * offset_line);
@@ -138,12 +152,15 @@ namespace Hoyo_Inventory_Scanner
 
         public abstract Artefact analyzeArtefact(Bitmap screenshot);
 
+        public abstract Task<Artefact> analyzeArtefactAsync(Bitmap screenshot);
+
         public abstract bool isValideArtefact(Artefact current_artefact);
 
         public void test() {
             bool success;
             int current_row = 0;
             int current_line = 0;
+            int artefact_counter = 0;
             Artefact current_artefact;
             Bitmap screenshot;
 
@@ -154,16 +171,41 @@ namespace Hoyo_Inventory_Scanner
             }
 
             Thread.Sleep(500);
-            Logger.LogDebug("moved : " + SetCursorPos(most_left_position, most_top_position));
+            SetCursorPos(most_left_position, most_top_position);
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-            for (int i = 0; i < 8 * 8; i++) {
-                Thread.Sleep((int)scan_speed);
-                moveCursorToNextArtefact(ref current_row, ref current_line);
-                if (Keyboard.IsKeyDown(Key.Escape))
-                    return;
-            }
+            Thread.Sleep((int)scan_speed);
+            screenshot = takeScreenshot();
 
+            //Bitmap grey_screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot);
+
+            //new ContrastCorrection(100).ApplyInPlace(grey_screenshot);
+            //new GammaCorrection(0.3).ApplyInPlace(grey_screenshot);
+            //new Invert().ApplyInPlace(grey_screenshot);
+
+            //grey_screenshot.Save("C:/Users/emman/Desktop/Hoyo-Inventory-Scanner/Scanner/test.png", ImageFormat.Png);
+            current_artefact = analyzeArtefact(screenshot);
+            
+            while (isValideArtefact(current_artefact)) {
+                artefacts.Add(current_artefact);
+                artefact_counter++;
+
+                // if tab is held down, stops the scan
+                if ((GetAsyncKeyState(0x09) & 0x8000) != 0) {
+                    Logger.LogDebug("Scanning process interrupted.");
+                    Logger.LogDebug(artefact_counter + " artefacts scanned.");
+                    WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
+                    return;
+                }
+
+                moveCursorToNextArtefact(ref current_row, ref current_line);
+                Thread.Sleep(50);
+                screenshot = takeScreenshot();
+                current_artefact = analyzeArtefact(screenshot);
+                Thread.Sleep((int)scan_speed);
+            }
+            Logger.LogDebug(artefact_counter + " artefacts scanned.");
+            WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
         }
 
     }

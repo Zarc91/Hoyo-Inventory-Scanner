@@ -71,7 +71,6 @@ namespace Hoyo_Inventory_Scanner
         private void Scan_Click(object sender, RoutedEventArgs e) {
             string game = (Game.SelectedItem as ComboBoxItem)?.Content.ToString();
             int scan_speed = int.TryParse(Speed.Text, out int v) ? v : 500;
-            bool scan_four_stars = Four_stars.IsChecked ?? false;
             bool is_geforce_now = GN.IsChecked ?? false;
             System.Drawing.Point top_left_of_game = new System.Drawing.Point(0, 0);
             Process[] processes;
@@ -96,21 +95,23 @@ namespace Hoyo_Inventory_Scanner
 
             switch (game) {
                 case "Genshin Impact":
-                    scanner = new ScannerGenshin(scan_speed, scan_four_stars, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
+                    scanner = new ScannerGenshin(scan_speed, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
                     break;
                 default:
-                    scanner = new ScannerGenshin(scan_speed, scan_four_stars, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
+                    scanner = new ScannerGenshin(scan_speed, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
                     break;
             }
 
             Logger.LogDebug("Game : " + game);
             Logger.LogDebug("Scan speed : " + scan_speed + "ms");
             Logger.LogDebug("Geforce Now : " + is_geforce_now);
-            Logger.LogDebug("Scan 4* : " + scan_four_stars);
             Logger.LogDebug("Starting scanning process now.");
             scanner.test();
             // scanner.scan();
             Logger.LogDebug("End of scanning process.");
+
+            Logger.LogResult(scanner.generateExport());
+            Logger.LogDebug("Generated the output.");
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)

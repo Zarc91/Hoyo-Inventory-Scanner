@@ -1,12 +1,16 @@
 ﻿namespace Hoyo_Inventory_Scanner
 {
     public class Substat {
-        private string stat { get; set; }
-        private float value { get; set; }
+        public string stat { get; set; }
+        public string value { get; set; }
 
-        public Substat(string stat, float value) {
+        public Substat(string stat, string value) {
             this.stat = stat;
             this.value = value;
+        }
+
+        public string generateExport() {
+            return "{\"key\":\"" + stat + "\",\"value\":" + value + "}";
         }
     }
 }

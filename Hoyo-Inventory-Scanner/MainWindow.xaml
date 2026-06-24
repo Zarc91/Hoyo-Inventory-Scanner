@@ -36,11 +36,8 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <CheckBox x:Name="Four_stars" Grid.Column="0" Content="Scan 4*" Padding="5,-5,0,0" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            
             <TextBox x:Name="Speed" Grid.Column="1" PreviewTextInput="Speed_PreviewTextInput" TextChanged="Speed_TextChanged" MaxLength="4" HorizontalAlignment="Center" Height="23" TextWrapping="Wrap" Text="200" VerticalAlignment="Center" Width="50"/>
             <Label Content="Scan speed (ms)"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,45" Grid.Column="1" Height="38"/>
 

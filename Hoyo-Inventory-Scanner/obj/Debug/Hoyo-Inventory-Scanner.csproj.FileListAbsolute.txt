@@ -19,3 +19,9 @@ C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoy
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Debug\Hoyo-Inventory-Scanner.csproj.CopyComplete
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Debug\ZZZ-Inventory-Scanner.exe
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Debug\ZZZ-Inventory-Scanner.pdb
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.dll
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.Imaging.dll
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.Math.dll
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.xml
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.Imaging.xml
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\bin\Debug\AForge.Math.xml

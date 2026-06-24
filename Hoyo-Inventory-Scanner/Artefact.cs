@@ -1,25 +1,36 @@
 ﻿namespace Hoyo_Inventory_Scanner
 {
     class Artefact {
-        private string set { get; set; }
-        private string slot { get; set; }
-        private string location { get; set; }
-        private string mainstat { get; set; }
-        private string rarity { get; set; }
-        private Substat[] substats { get; set; } = new Substat[4];
+        public string set { get; set; }
+        public string slot { get; set; }
+        public string location { get; set; }
+        public string mainstat { get; set; }
+        public string level { get; set; }
+        public Substat[] substats { get; set; } = new Substat[4];
 
-        public Artefact(string set, string slot, string location, string mainstat, string rarity, Substat[] substats) {
+        public Artefact(string set, string slot, string location, string mainstat, string level, Substat[] substats) {
             this.set = set;
             this.slot = slot;
             this.location = location;
             this.mainstat = mainstat;
-            this.rarity = rarity;
+            this.level = level;
             this.substats = substats;
         }
 
-        public string toString() {
-
-            return "";
+        public string generateExport() {
+            string sub = "";
+            foreach (Substat substat in substats) {
+                sub += substat.generateExport() + ",";
+            }
+            sub = sub.Remove(sub.Length - 1);
+            return 
+                "{\"setKey\":\"" + set + "\"," +
+                "\"rarity\":5," +
+                "\"level\":" + level + "," +
+                "\"slotKey\":\"" + slot + "\"," +
+                "\"mainStatKey\":\"" + mainstat + "\"," +
+                "\"substats\":[" + sub + "]," +
+                "\"location\":\"" + location + "\"}";
         }
     }
 }
