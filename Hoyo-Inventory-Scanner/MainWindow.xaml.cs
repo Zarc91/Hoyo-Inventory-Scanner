@@ -75,6 +75,7 @@ namespace Hoyo_Inventory_Scanner
             System.Drawing.Point top_left_of_game = new System.Drawing.Point(0, 0);
             Process[] processes;
             string game_process = "GenshinImpact";
+            Stopwatch stopwatch = new Stopwatch();
 
             if (game.Equals("HSR"))
                 game_process = "StarRail";
@@ -106,10 +107,12 @@ namespace Hoyo_Inventory_Scanner
             Logger.LogDebug("Scan speed : " + scan_speed + "ms");
             Logger.LogDebug("Geforce Now : " + is_geforce_now);
             Logger.LogDebug("Starting scanning process now.");
+            stopwatch.Start();
             scanner.test();
             // scanner.scan();
+            stopwatch.Stop();
             Logger.LogDebug("End of scanning process.");
-
+            Logger.LogDebug("Execution time : " + stopwatch.Elapsed.TotalMinutes + "min " + stopwatch.Elapsed.Seconds + "s");
             Logger.LogResult(scanner.generateExport());
             Logger.LogDebug("Generated the output.");
         }

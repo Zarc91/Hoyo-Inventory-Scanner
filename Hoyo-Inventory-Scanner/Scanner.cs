@@ -6,6 +6,8 @@ using System.Threading;
 using System.Drawing.Imaging;
 using AForge.Imaging.Filters;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using Tesseract;
 
 namespace Hoyo_Inventory_Scanner
 {
@@ -56,39 +58,62 @@ namespace Hoyo_Inventory_Scanner
             int current_row = 0;
             int current_line = 0;
             int artefact_counter = 0;
-            Artefact current_artefact;
             Bitmap screenshot;
+            BlockingCollection<Bitmap> queue = new BlockingCollection<Bitmap>(8);
+            Thread[] threads = new Thread[8];
 
             success = focusWindow();
-            if(!success) {
+            if (!success) {
                 Logger.LogDebug("Error : the game window was not found.");
                 return;
             }
 
+            for (int i = 0; i < threads.Length; i++) {
+                threads[i] = new Thread(() => {
+                    foreach (Bitmap s in queue.GetConsumingEnumerable()) {
+                        try { analyzeArtefact(s); } finally { s.Dispose(); }
+                    }
+                });
+                threads[i].IsBackground = true;
+                threads[i].Start();
+            }
+
+            Thread.Sleep(500);
             SetCursorPos(most_left_position, most_top_position);
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-
+            Thread.Sleep((int)scan_speed);
             screenshot = takeScreenshot();
-
-            current_artefact = analyzeArtefact(screenshot);
-
-            while(isValideArtefact(current_artefact)) {
-                artefacts.Add(current_artefact);
-                moveCursorToNextArtefact(ref current_row, ref current_line);
-                screenshot = takeScreenshot();
-                current_artefact = analyzeArtefact(screenshot);
-
+            
+            while (checkLevel(screenshot)) {
                 // if tab is held down, stops the scan
                 if ((GetAsyncKeyState(0x09) & 0x8000) != 0) {
+                    queue.CompleteAdding();
+                    foreach (Thread thread in threads) {
+                        thread.Join();
+                    }
+                    Logger.ClearResult();
                     Logger.LogDebug("Scanning process interrupted.");
                     Logger.LogDebug(artefact_counter + " artefacts scanned.");
                     WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
                     return;
                 }
 
+                artefact_counter++;
+                queue.Add(screenshot);
+                Logger.LogResult("");
+
+                moveCursorToNextArtefact(ref current_row, ref current_line);
                 Thread.Sleep((int)scan_speed);
+                screenshot = takeScreenshot();
             }
+
+            queue.CompleteAdding();
+            foreach (Thread thread in threads) {
+                thread.Join();
+            }
+
+            Logger.ClearResult();
             Logger.LogDebug(artefact_counter + " artefacts scanned.");
             WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
         }
@@ -100,6 +125,7 @@ namespace Hoyo_Inventory_Scanner
             if(current_row < rows_per_line - 1) {
                 current_row += 1;
                 SetCursorPos(most_left_position + current_row * offset_row, most_top_position + current_line * offset_line);
+                Thread.Sleep(3);
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
             }
@@ -110,6 +136,7 @@ namespace Hoyo_Inventory_Scanner
                     current_line += 1;
                     current_row = 0;
                     SetCursorPos(most_left_position + current_row * offset_row, most_top_position + current_line * offset_line);
+                    Thread.Sleep(3);
                     mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
                     mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
                 }
@@ -129,12 +156,13 @@ namespace Hoyo_Inventory_Scanner
                         mouse_event(MOUSEEVENTF_MOVE, 1, 0, 0, 0);
                         Thread.Sleep(3);
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                     mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                    Thread.Sleep(500);
+                    Thread.Sleep(100);
                     current_line = 0;
                     current_row = 0;
                     SetCursorPos(most_left_position + current_row * offset_row, most_top_position + current_line * offset_line);
+                    Thread.Sleep(100);
                     mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
                     mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
                 }
@@ -143,31 +171,43 @@ namespace Hoyo_Inventory_Scanner
 
         public Bitmap takeScreenshot() {
             Bitmap captureBitmap = new Bitmap(screenshot_size.Width, screenshot_size.Height);
-            Graphics captureGraphics = Graphics.FromImage(captureBitmap);
-            captureGraphics.CopyFromScreen(screenshot_start_x, screenshot_start_y, 0, 0, screenshot_size);
+            using (Graphics g = Graphics.FromImage(captureBitmap)) {
+                g.CopyFromScreen(screenshot_start_x, screenshot_start_y, 0, 0, screenshot_size);
+            }
             return captureBitmap;
         }
 
         public abstract bool focusWindow();
 
-        public abstract Artefact analyzeArtefact(Bitmap screenshot);
-
-        public abstract Task<Artefact> analyzeArtefactAsync(Bitmap screenshot);
+        public abstract void analyzeArtefact(Bitmap screenshot);
 
         public abstract bool isValideArtefact(Artefact current_artefact);
+
+        public abstract bool checkLevel(Bitmap screenshot);
 
         public void test() {
             bool success;
             int current_row = 0;
             int current_line = 0;
             int artefact_counter = 0;
-            Artefact current_artefact;
             Bitmap screenshot;
+            BlockingCollection<Bitmap> queue = new BlockingCollection<Bitmap>(8);
+            Thread[] threads = new Thread[8];
 
             success = focusWindow();
             if (!success) {
                 Logger.LogDebug("Error : the game window was not found.");
                 return;
+            }
+
+            for (int i = 0; i < threads.Length; i++) {
+                threads[i] = new Thread(() => {
+                    foreach (Bitmap s in queue.GetConsumingEnumerable()) {
+                        try { analyzeArtefact(s); } finally { s.Dispose(); }
+                    }
+                });
+                threads[i].IsBackground = true;
+                threads[i].Start();
             }
 
             Thread.Sleep(500);
@@ -184,26 +224,37 @@ namespace Hoyo_Inventory_Scanner
             //new Invert().ApplyInPlace(grey_screenshot);
 
             //grey_screenshot.Save("C:/Users/emman/Desktop/Hoyo-Inventory-Scanner/Scanner/test.png", ImageFormat.Png);
-            current_artefact = analyzeArtefact(screenshot);
+            //current_artefact = analyzeArtefact(screenshot);
             
-            while (isValideArtefact(current_artefact)) {
-                artefacts.Add(current_artefact);
-                artefact_counter++;
-
+            while (checkLevel(screenshot)) {
                 // if tab is held down, stops the scan
                 if ((GetAsyncKeyState(0x09) & 0x8000) != 0) {
+                    queue.CompleteAdding();
+                    foreach (Thread thread in threads) {
+                        thread.Join();
+                    }
+                    Logger.ClearResult();
                     Logger.LogDebug("Scanning process interrupted.");
                     Logger.LogDebug(artefact_counter + " artefacts scanned.");
                     WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
                     return;
                 }
 
+                artefact_counter++;
+                queue.Add(screenshot);
+                Logger.LogResult("");
+
                 moveCursorToNextArtefact(ref current_row, ref current_line);
-                Thread.Sleep(50);
-                screenshot = takeScreenshot();
-                current_artefact = analyzeArtefact(screenshot);
                 Thread.Sleep((int)scan_speed);
+                screenshot = takeScreenshot();
             }
+
+            queue.CompleteAdding();
+            foreach (Thread thread in threads) {
+                thread.Join();
+            }
+
+            Logger.ClearResult();
             Logger.LogDebug(artefact_counter + " artefacts scanned.");
             WindowHelper.FocusWindow("ZZZ-Inventory-Scanner");
         }
