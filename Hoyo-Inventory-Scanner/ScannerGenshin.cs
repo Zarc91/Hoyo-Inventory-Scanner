@@ -129,8 +129,13 @@ namespace Hoyo_Inventory_Scanner
                                 ocrtext = page.GetText();
                                 if (ocrtext.Contains("ATK") || ocrtext.Contains("HP") || ocrtext.Contains("DEF"))
                                     mainstat = ocrtext.Trim().ToLower() + "_";
-                                if (ocrtext.Contains("DMG Bonus"))
-                                    mainstat = ocrtext.Trim().Split(' ')[0].ToLower() + "_dmg_";
+                                if (ocrtext.Contains("DMG Bonus")) {
+                                    // problem with Tesseract reading "Anemo" correctly
+                                    if (ocrtext.Contains("Anemo"))
+                                        mainstat = "anemo_dmg_";
+                                    else
+                                        mainstat = ocrtext.Trim().Split(' ')[0].ToLower() + "_dmg_";
+                                    }
                                 if (ocrtext.Contains("Elemental Mastery"))
                                     mainstat = "eleMas";
                                 if (ocrtext.Contains("Energy Recharge"))

@@ -24,3 +24,4 @@ C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoy
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Release\Hoyo-Inventory-Scanner.csproj.CopyComplete
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Release\Hoyo-Inventory-Scanner.exe
 C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Release\Hoyo-Inventory-Scanner.pdb
+C:\Users\emman\Desktop\Hoyo-Inventory-Scanner\Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\Hoyo-Inventory-Scanner\obj\Release\Hoyo-Inventory-Scanner.csproj.AssemblyReference.cache
