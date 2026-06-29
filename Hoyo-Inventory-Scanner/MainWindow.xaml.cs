@@ -1,10 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Text.RegularExpressions;
-using System.Drawing;
 using System.Diagnostics;
+using System.IO;
+using System;
 
 namespace Hoyo_Inventory_Scanner
 {
@@ -50,14 +50,11 @@ namespace Hoyo_Inventory_Scanner
         }
 
         private void Speed_TextChanged(object sender, TextChangedEventArgs e) {
-            if (int.TryParse(Speed.Text, out int value))
-            {
-                if (value < 100 || value > 9999)
-                {
+            if (int.TryParse(Speed.Text, out int value)) {
+                if (value < 100 || value > 9999) {
                     Speed.Background = System.Windows.Media.Brushes.LightCoral; // invalide
                 }
-                else
-                {
+                else {
                     Speed.Background = System.Windows.Media.Brushes.White; // valide
                 }
             }
@@ -75,6 +72,7 @@ namespace Hoyo_Inventory_Scanner
             System.Drawing.Point top_left_of_game = new System.Drawing.Point(0, 0);
             Process[] processes;
             string game_process = "GenshinImpact";
+            Stopwatch stopwatch = new Stopwatch();
 
             if (game.Equals("HSR"))
                 game_process = "StarRail";
@@ -106,22 +104,27 @@ namespace Hoyo_Inventory_Scanner
             Logger.LogDebug("Scan speed : " + scan_speed + "ms");
             Logger.LogDebug("Geforce Now : " + is_geforce_now);
             Logger.LogDebug("Starting scanning process now.");
-            scanner.test();
-            // scanner.scan();
+            stopwatch.Start();
+            scanner.scan();
+            stopwatch.Stop();
             Logger.LogDebug("End of scanning process.");
-
+            Logger.LogDebug("Execution time : " + stopwatch.Elapsed.TotalMinutes.ToString()[0] + "min " + stopwatch.Elapsed.Seconds + "s");
             Logger.LogResult(scanner.generateExport());
             Logger.LogDebug("Generated the output.");
         }
 
-        private void Export_Click(object sender, RoutedEventArgs e)
-        {
-
+        private void Export_Click(object sender, RoutedEventArgs e) {
+            string game = (Game.SelectedItem as ComboBoxItem)?.Content.ToString();
+            if (!ResultBox.Text.Equals("")) {
+                File.WriteAllText("./saved_exports/" + game + DateTime.Now.ToString(" dd-MM-yy HH-mm-ss") + ".json", ResultBox.Text);
+                Process.Start("explorer.exe", @".\saved_exports");
+                WindowHelper.FocusWindow("explorer");
+            }
         }
 
-        private void Copy_Click(object sender, RoutedEventArgs e)
-        {
-
+        private void Copy_Click(object sender, RoutedEventArgs e) {
+            ResultBox.SelectAll();
+            ResultBox.Copy();
         }
     }
 }
