@@ -1,11 +1,6 @@
 ﻿using AForge.Imaging.Filters;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tesseract;
 
 namespace Hoyo_Inventory_Scanner
@@ -32,14 +27,7 @@ namespace Hoyo_Inventory_Scanner
             return "{\"format\":\"GOOD\",\"source\":\"Hoyo Inventory Scanner\",\"version\":3,\"artifacts\":[" + art + "]}";
         }
 
-        public override bool isValideArtefact(Artefact current_artefact) {
-            if (current_artefact.level.Equals("20"))
-                return true;
-            else
-                return false;
-        }
-
-        public override bool checkLevel(Bitmap screenshot) {
+        public override bool isValideArtefact(Bitmap screenshot) {
             string ocrtext = string.Empty;
             int offset = 0;
             string level = string.Empty;
@@ -47,22 +35,32 @@ namespace Hoyo_Inventory_Scanner
             new ContrastCorrection(100).ApplyInPlace(grey_screenshot);
             Bitmap inverted_grey_screenshot = new Invert().Apply(grey_screenshot);
 
-            TesseractEngine engine = new TesseractEngine(@"./tessdata", "genshin_fast", EngineMode.LstmOnly);
+            using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "genshin_fast", EngineMode.LstmOnly))
+            {
+                // sanctifying elixir ?
+                using (Pix screenshot_sanctifying = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(56, 236, 126, 26), grey_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_sanctifying))
+                    {
+                        ocrtext = page.GetText();
+                    }
+                }
+                if (ocrtext.Contains("Sanctifying"))
+                    offset = 38;
 
-            // sanctifying elixir ?
-            Pix screenshot_sanctifying = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(56, 236, 126, 26), grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_sanctifying)) {
-                ocrtext = page.GetText();
+                // level
+                using (Pix screenshot_level = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(32, 253 + offset, 50, 22), inverted_grey_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_level))
+                    {
+                        ocrtext = page.GetText();
+                        level = ocrtext.Trim().Replace("+", string.Empty);
+                    }
+                }
             }
-            if (ocrtext.Contains("Sanctifying"))
-                offset = 38;
 
-            // level
-            Pix screenshot_level = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(32, 253 + offset, 50, 22), inverted_grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_level)) {
-                ocrtext = page.GetText();
-                level = ocrtext.Trim().Replace("+", string.Empty);
-            }
+            grey_screenshot.Dispose();
+            inverted_grey_screenshot.Dispose();
 
             if (level.Equals("20"))
                 return true;
@@ -86,114 +84,125 @@ namespace Hoyo_Inventory_Scanner
             new ContrastCorrection(100).ApplyInPlace(gamma_screenshot);
             Bitmap inverted_grey_screenshot = new Invert().Apply(grey_screenshot);
 
-            TesseractEngine engine = new TesseractEngine(@"./tessdata", "genshin_fast", EngineMode.LstmOnly);
-
-            // slot : flower, plume, sands, goblet or circlet
-            Pix screenshot_slot = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(25, 13, 80, 26), inverted_grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_slot))
+            using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "genshin_fast", EngineMode.LstmOnly))
             {
-                ocrtext = page.GetText();
-                slot = ocrtext.Trim().Split(' ')[0].ToLower();
-            }
-
-            // which character equipped this artefact
-            Pix screenshot_location = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(80, 740, 400, 30), grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_location))
-            {
-                ocrtext = page.GetText();
-                if (ocrtext.Contains("Equipped:"))
-                    location = ocrtext.Trim().Replace("Equipped:", string.Empty).Replace(" ", string.Empty);
-            }
-
-            // mainstat : 
-            // flower : hp
-            // plume : atk                                                                                      
-            // sands : atk_, hp_, def_, eleMas, enerRech_
-            // goblet : atk_, hp_, def_, eleMas, physical_dmg_, anemo_dmg_, geo_dmg_, electro_dmg_, hydro_dmg_, pyro_dmg_, cryo_dmg_, dendro_dmg_
-            // circlet : atk_, hp_, def_, eleMas, critRate_, critDMG_, heal_
-            switch (slot)
-            {
-                case "flower":
-                    mainstat = "hp";
-                    break;
-                case "plume":
-                    mainstat = "atk";
-                    break;
-                default:
-                    Pix screenshot_mainstat = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(20, 93, 230, 30), inverted_grey_screenshot.PixelFormat));
-                    using (Page page = engine.Process(screenshot_mainstat))
+                // slot : flower, plume, sands, goblet or circlet
+                using (Pix screenshot_slot = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(25, 13, 80, 26), inverted_grey_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_slot))
                     {
                         ocrtext = page.GetText();
-                        if (ocrtext.Contains("ATK") || ocrtext.Contains("HP") || ocrtext.Contains("DEF"))
-                            mainstat = ocrtext.Trim().ToLower() + "_";
-                        if (ocrtext.Contains("DMG Bonus"))
-                            mainstat = ocrtext.Trim().Split(' ')[0].ToLower() + "_dmg_";
-                        if (ocrtext.Contains("Elemental Mastery"))
-                            mainstat = "eleMas";
-                        if (ocrtext.Contains("Energy Recharge"))
-                            mainstat = "enerRech_";
-                        if (ocrtext.Contains("Healing Bonus"))
-                            mainstat = "heal_";
-                        if (ocrtext.Contains("CRIT"))
-                            mainstat = "crit" + ocrtext.Trim().Split(' ')[1] + "_";
+                        slot = ocrtext.Trim().Split(' ')[0].ToLower();
                     }
-                    screenshot_mainstat.Dispose();
-                    break;
-            }
+                }
 
-            // sanctifying elixir ?
-            Pix screenshot_sanctifying = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(56, 236, 126, 26), grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_sanctifying))
-            {
-                ocrtext = page.GetText();
-            }
-            if (ocrtext.Contains("Sanctifying"))
-                offset = 38;
-
-            // level
-            Pix screenshot_level = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(32, 253 + offset, 50, 22), inverted_grey_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_level))
-            {
-                ocrtext = page.GetText();
-                level = ocrtext.Trim().Replace("+", string.Empty);
-            }
-
-            // which set
-            Pix screenshot_set = PixConverter.ToPix(gamma_screenshot.Clone(new Rectangle(26, 457 + offset, 459, 54), gamma_screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_set))
-            {
-                ocrtext = page.GetText();
-                set = ocrtext.Replace("\n", " ");
-                set = set.Trim().Split(':')[0];
-                set = string.Join(" ", set.Split(' ', '-').Select(w => char.ToUpper(w[0]) + w.Substring(1).ToLower()));
-                set = set.Replace(" ", string.Empty).Replace("'", string.Empty).Replace("-", string.Empty);
-            }
-
-            // substats : atk, hp, def, atk_, hp_, def_, eleMas, enerRech_, critRate_, critDMG_
-            Pix screenshot_sub = PixConverter.ToPix(screenshot.Clone(new Rectangle(47, 300 + offset, 303, 150), screenshot.PixelFormat));
-            using (Page page = engine.Process(screenshot_sub))
-            {
-                ocrtext = page.GetText().Trim();
-                int i = 0;
-                foreach (string substat in ocrtext.Split('\n'))
+                // which character equipped this artefact
+                using (Pix screenshot_location = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(80, 740, 400, 30), grey_screenshot.PixelFormat)))
                 {
-                    if (!substat.Equals(string.Empty))
+                    using (Page page = engine.Process(screenshot_location))
                     {
-                        if (substat.Contains("CRIT"))
-                            substats[i] = new Substat("crit" + substat.Split('+')[0].Split(' ')[1], substat.Split('+')[1]);
-                        if (substat.Contains("Elemental Mastery"))
-                            substats[i] = new Substat("eleMas", substat.Split('+')[1].Replace(".", string.Empty));
-                        if (substat.Contains("Energy Recharge"))
-                            substats[i] = new Substat("enerRech", substat.Split('+')[1].Replace("¥", string.Empty));
-                        if (substat.Contains("ATK") || substat.Contains("HP") || substat.Contains("DEF"))
-                            substats[i] = new Substat(substat.Split('+')[0].ToLower(), substat.Split('+')[1]);
-                        // if value is a %, add _ to the stat key
-                        if (substats[i].value.Contains("%"))
+                        ocrtext = page.GetText();
+                        if (ocrtext.Contains("Equipped:"))
+                            location = ocrtext.Trim().Replace("Equipped:", string.Empty).Replace(" ", string.Empty);
+                    }
+                }
+
+                // mainstat : 
+                // flower : hp
+                // plume : atk                                                                                      
+                // sands : atk_, hp_, def_, eleMas, enerRech_
+                // goblet : atk_, hp_, def_, eleMas, physical_dmg_, anemo_dmg_, geo_dmg_, electro_dmg_, hydro_dmg_, pyro_dmg_, cryo_dmg_, dendro_dmg_
+                // circlet : atk_, hp_, def_, eleMas, critRate_, critDMG_, heal_
+                switch (slot)
+                {
+                    case "flower":
+                        mainstat = "hp";
+                        break;
+                    case "plume":
+                        mainstat = "atk";
+                        break;
+                    default:
+                        using (Pix screenshot_mainstat = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(20, 93, 230, 30), inverted_grey_screenshot.PixelFormat)))
                         {
-                            substats[i].stat += "_";
-                            substats[i].value = substats[i].value.Replace("%", string.Empty);
+                            using (Page page = engine.Process(screenshot_mainstat))
+                            {
+                                ocrtext = page.GetText();
+                                if (ocrtext.Contains("ATK") || ocrtext.Contains("HP") || ocrtext.Contains("DEF"))
+                                    mainstat = ocrtext.Trim().ToLower() + "_";
+                                if (ocrtext.Contains("DMG Bonus"))
+                                    mainstat = ocrtext.Trim().Split(' ')[0].ToLower() + "_dmg_";
+                                if (ocrtext.Contains("Elemental Mastery"))
+                                    mainstat = "eleMas";
+                                if (ocrtext.Contains("Energy Recharge"))
+                                    mainstat = "enerRech_";
+                                if (ocrtext.Contains("Healing Bonus"))
+                                    mainstat = "heal_";
+                                if (ocrtext.Contains("CRIT"))
+                                    mainstat = "crit" + ocrtext.Trim().Split(' ')[1] + "_";
+                            }
                         }
-                        i++;
+                        break;
+                }
+
+                // sanctifying elixir ?
+                using (Pix screenshot_sanctifying = PixConverter.ToPix(grey_screenshot.Clone(new Rectangle(56, 236, 126, 26), grey_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_sanctifying))
+                    {
+                        ocrtext = page.GetText();
+                    }
+                }
+                if (ocrtext.Contains("Sanctifying"))
+                    offset = 38;
+
+                // level
+                using (Pix screenshot_level = PixConverter.ToPix(inverted_grey_screenshot.Clone(new Rectangle(32, 253 + offset, 50, 22), inverted_grey_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_level))
+                    {
+                        ocrtext = page.GetText();
+                        level = ocrtext.Trim().Replace("+", string.Empty);
+                    }
+                }
+
+                // which set
+                using (Pix screenshot_set = PixConverter.ToPix(gamma_screenshot.Clone(new Rectangle(26, 457 + offset, 459, 54), gamma_screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_set))
+                    {
+                        ocrtext = page.GetText();
+                        set = ocrtext.Replace("\n", " ");
+                        set = set.Trim().Split(':')[0];
+                        set = string.Join(" ", set.Split(' ', '-').Select(w => char.ToUpper(w[0]) + w.Substring(1).ToLower()));
+                        set = set.Replace(" ", string.Empty).Replace("'", string.Empty).Replace("-", string.Empty);
+                    }
+                }
+
+                // substats : atk, hp, def, atk_, hp_, def_, eleMas, enerRech_, critRate_, critDMG_
+                using (Pix screenshot_sub = PixConverter.ToPix(screenshot.Clone(new Rectangle(47, 300 + offset, 303, 150), screenshot.PixelFormat)))
+                {
+                    using (Page page = engine.Process(screenshot_sub))
+                    {
+                        ocrtext = page.GetText().Trim();
+                        int i = 0;
+                        foreach (string substat in ocrtext.Split('\n')) {
+                            if (!substat.Equals(string.Empty)) {
+                                if (substat.Contains("CRIT"))
+                                    substats[i] = new Substat("crit" + substat.Split('+')[0].Split(' ')[1], substat.Split('+')[1]);
+                                if (substat.Contains("Elemental Mastery"))
+                                    substats[i] = new Substat("eleMas", substat.Split('+')[1].Replace(".", string.Empty));
+                                if (substat.Contains("Energy Recharge"))
+                                    substats[i] = new Substat("enerRech", substat.Split('+')[1].Replace("¥", string.Empty));
+                                if (substat.Contains("ATK") || substat.Contains("HP") || substat.Contains("DEF"))
+                                    substats[i] = new Substat(substat.Split('+')[0].ToLower(), substat.Split('+')[1]);
+                                // if value is a %, add _ to the stat key
+                                if (substats[i].value.Contains("%")) {
+                                    substats[i].stat += "_";
+                                    substats[i].value = substats[i].value.Replace("%", string.Empty);
+                                }
+                                i++;
+                            }
+                        }
                     }
                 }
             }
@@ -201,13 +210,6 @@ namespace Hoyo_Inventory_Scanner
             grey_screenshot.Dispose();
             gamma_screenshot.Dispose();
             inverted_grey_screenshot.Dispose();
-            screenshot_level.Dispose();
-            screenshot_location.Dispose();
-            screenshot_sanctifying.Dispose();
-            screenshot_set.Dispose();
-            screenshot_slot.Dispose();
-            screenshot_sub.Dispose();
-            engine.Dispose();
 
             artefacts.Add(new Artefact(set, slot, location, mainstat, level, substats));
         }
