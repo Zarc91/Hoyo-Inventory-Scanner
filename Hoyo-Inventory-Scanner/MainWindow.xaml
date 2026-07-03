@@ -26,7 +26,7 @@
             <!--https://www.youtube.com/watch?v=4bZWEDBZl74-->
             <ComboBox x:Name="Game" Grid.Column="1" Width="160" SelectedIndex="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ComboBoxItem Content="Genshin Impact"/>
-                <ComboBoxItem Content="HSR" IsEnabled="False"/>
+                <ComboBoxItem Content="HSR"/>
                 <ComboBoxItem Content="ZZZ" IsEnabled="False"/>
             </ComboBox>
             <Label Content="Choose the game"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,17,57" Grid.Column="1" Height="38"/>

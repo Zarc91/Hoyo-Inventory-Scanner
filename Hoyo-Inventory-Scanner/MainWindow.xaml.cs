@@ -95,6 +95,9 @@ namespace Hoyo_Inventory_Scanner
                 case "Genshin Impact":
                     scanner = new ScannerGenshin(scan_speed, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
                     break;
+                case "HSR":
+                    scanner = new ScannerHSR(scan_speed, is_geforce_now, top_left_of_game.X + 187, top_left_of_game.Y + 268, 125, 149, 9, 5, new System.Drawing.Size(440, 625), top_left_of_game.X + 1402, top_left_of_game.Y + 194);
+                    break;
                 default:
                     scanner = new ScannerGenshin(scan_speed, is_geforce_now, top_left_of_game.X + 179, top_left_of_game.Y + 254, 146, 175, 8, 4, new System.Drawing.Size(492, 781), top_left_of_game.X + 1308, top_left_of_game.Y + 178);
                     break;

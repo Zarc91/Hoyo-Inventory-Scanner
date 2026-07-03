@@ -86,6 +86,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Artefact.cs" />
+    <Compile Include="ArtefactHSR.cs" />
+    <Compile Include="ScannerHSR.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ScannerGenshin.cs" />
     <Compile Include="WindowHelper.cs" />
@@ -97,7 +100,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Artefact.cs" />
+    <Compile Include="ArtefactGenshin.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="Substat.cs" />
     <Compile Include="MainWindow.xaml.cs">

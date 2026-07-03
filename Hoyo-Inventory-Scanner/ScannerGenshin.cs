@@ -216,7 +216,7 @@ namespace Hoyo_Inventory_Scanner
             gamma_screenshot.Dispose();
             inverted_grey_screenshot.Dispose();
 
-            artefacts.Add(new Artefact(set, slot, location, mainstat, level, substats));
+            artefacts.Add(new ArtefactGenshin(set, slot, location, mainstat, level, substats));
         }
     }
 }
