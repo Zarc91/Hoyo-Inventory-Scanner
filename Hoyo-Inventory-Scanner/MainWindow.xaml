@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Hoyo_Inventory_Scanner"
         mc:Ignorable="d"
-        Title="Hoyo Inventory Scanner" Background="#FFFFFF" FontSize="18" Height="600" MinWidth="470" MinHeight="450" Width="1150">
+        Title="Hoyo Inventory Scanner" Background="#FFFFFF" FontSize="18" Height="800" MinWidth="470" MinHeight="450" Width="1300">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
@@ -46,8 +46,8 @@
         <!--Scan result + debug window-->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="7*"/>
             </Grid.ColumnDefinitions>
 
             <TextBox Name="DebugBox"

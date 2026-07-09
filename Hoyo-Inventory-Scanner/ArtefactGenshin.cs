@@ -24,7 +24,7 @@
             }
             sub = sub.Remove(sub.Length - 1);
             return 
-                "{\"setKey\":\"" + set + "\"," +
+                "\n{\"setKey\":\"" + set + "\"," +
                 "\"rarity\":5," +
                 "\"level\":" + level + "," +
                 "\"slotKey\":\"" + slot + "\"," +

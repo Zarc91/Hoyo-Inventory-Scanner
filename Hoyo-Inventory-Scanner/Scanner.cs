@@ -79,8 +79,12 @@ namespace Hoyo_Inventory_Scanner
                         mouse_event(MOUSEEVENTF_MOVE, -1 * step, 0, 0, 0);
                         Thread.Sleep(20);
                     }
-                    for (int i = 0; i < ( offset_line * lines_before_scrolling + 1 ) / step; i++) {
+                    for (int i = 0; i < offset_line * lines_before_scrolling / step; i++) {
                         mouse_event(MOUSEEVENTF_MOVE, 0, -1 * step, 0, 0);
+                        Thread.Sleep(20);
+                    }
+                    for (int i = 0; i < offset_line * lines_before_scrolling - offset_line * lines_before_scrolling / step * step - 1; i++) {
+                        mouse_event(MOUSEEVENTF_MOVE, 0, -1, 0, 0);
                         Thread.Sleep(20);
                     }
                     for (int i = 0; i < 100 / step; i++) {
